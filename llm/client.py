@@ -77,7 +77,9 @@ class OllamaClient(BaseLLMClient):
                     "temperature": temp,
                     "stream": False,
                 },
-                timeout=120.0,
+                # 300s: modelos pequenos em CPU podem levar >120s no cold start
+                # (primeira chamada apos o Ollama carregar os pesos na memoria)
+                timeout=300.0,
             )
             
             if response.status_code != 200:

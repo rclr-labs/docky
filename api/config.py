@@ -24,11 +24,11 @@ class Settings(BaseSettings):
     
     # Ollama
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "mistral"
+    OLLAMA_MODEL: str = "phi3.5"  # modelo pequeno (2.2GB), conforme design do README
     OLLAMA_TEMPERATURE: float = 0.7
     
     # Embeddings
-    EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"  # multilingue, melhor para PT
     EMBEDDING_DIMENSION: int = 384
     EMBEDDING_DEVICE: str = "cpu"
     
