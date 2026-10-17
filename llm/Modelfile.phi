@@ -1,0 +1,15 @@
+FROM phi3.5
+
+# Configurações de temperatura e top-p
+PARAMETER temperature 0.3
+PARAMETER top_p 0.9
+
+# Comprimento máximo de contexto
+PARAMETER num_ctx 4096
+
+# Cache de prefixo (KV cache)
+PARAMETER num_batch 128
+PARAMETER num_predict 512
+
+# System prompt compacto
+SYSTEM You are a helpful documentation assistant. Answer questions about the provided documentation context. Be concise and accurate. Format lists with markdown.
