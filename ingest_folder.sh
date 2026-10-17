@@ -1,65 +1,78 @@
 #!/bin/bash
+# Ingerir todos os documentos (.md, .txt, .json, .yaml) de uma pasta no Docky.
+# Roda dentro do container docky-api-1, onde o SearchService ja aponta pro Qdrant certo.
+#
+# Uso:
+#   ./ingest_folder.sh <pasta-dentro-do-container>
+#
+# Exemplo (pasta ja copiada para data/raw, que esta montada como volume):
+#   ./ingest_folder.sh data/raw
+
+set -e
 
 if [ -z "$1" ]; then
   echo "Uso: ./ingest_folder.sh <pasta>"
+  echo "Exemplo: ./ingest_folder.sh data/raw"
   exit 1
 fi
 
 FOLDER="$1"
+CONTAINER="docky-api-1"
 
-if [ ! -d "$FOLDER" ]; then
-  echo "Erro: Pasta nao encontrada: $FOLDER"
-  exit 1
-fi
-
-echo "Ingestao de pasta: $FOLDER"
-echo "=================================================="
-
-python3 << 'PYTHON_EOF'
-import os
+cat > /tmp/_docky_ingest_folder.py << PYEOF
+import asyncio
 import sys
+import uuid
 from pathlib import Path
+
 from ingest.ingestors import DocumentIngestor
 from api.search import SearchService
 
-folder = "$FOLDER"
-ingestor = DocumentIngestor(SearchService())
+FOLDER = "$FOLDER"
+EXTENSIONS = [".md", ".txt", ".json", ".yaml", ".yml"]
 
-ext_map = {
-    ".md": "markdown",
-    ".txt": "text",
-    ".json": "json",
-    ".yaml": "yaml",
-    ".yml": "yaml"
-}
+async def main():
+    folder = Path(FOLDER)
+    if not folder.is_dir():
+        print(f"Erro: pasta nao encontrada dentro do container: {FOLDER}")
+        sys.exit(1)
 
-files = []
-for ext, doc_type in ext_map.items():
-    for f in Path(folder).rglob(f"*{ext}"):
-        if f.is_file():
-            files.append((str(f), doc_type))
+    files = [f for ext in EXTENSIONS for f in folder.rglob(f"*{ext}") if f.is_file()]
+    if not files:
+        print("Nenhum arquivo encontrado")
+        sys.exit(1)
 
-if not files:
-    print("Nenhum arquivo encontrado")
-    sys.exit(1)
+    print(f"Encontrados: {len(files)} arquivo(s)\n")
 
-print(f"\nIngerindo {len(files)} documentos...")
-print()
+    ingestor = DocumentIngestor(SearchService())
+    ok, fail = 0, 0
 
-try:
-    results = ingestor.ingest_batch(files)
-    print()
-    print("================================================")
-    print(f"OK: {len(results)} documentos ingeridos!")
-    print("================================================")
-    print()
-    for i, (file_path, doc_type) in enumerate(files, 1):
-        print(f"  {i}. {file_path}")
-    print()
-except Exception as e:
-    print(f"Erro: {e}")
-    import traceback
-    traceback.print_exc()
+    for f in files:
+        doc_id = str(uuid.uuid4())  # doc_id UNICO por arquivo - nunca reusar entre arquivos
+        print(f"Ingerindo: {f}...", end=" ", flush=True)
+        try:
+            result = await ingestor.ingest(str(f), doc_id=doc_id)
+            if result.status == "success":
+                print(f"OK ({result.chunks_indexed} chunks)")
+                ok += 1
+            else:
+                print(f"FALHOU: {result.error_message}")
+                fail += 1
+        except Exception as e:
+            print(f"ERRO: {e}")
+            fail += 1
 
-PYTHON_EOF
+    print(f"\nConcluido: {ok} ok, {fail} falha(s), de {len(files)} arquivo(s)")
+
+asyncio.run(main())
+PYEOF
+
+echo "Copiando script para o container $CONTAINER..."
+docker cp /tmp/_docky_ingest_folder.py "$CONTAINER:/app/_docky_ingest_folder.py"
+
+echo "Ingerindo pasta '$FOLDER' dentro do container..."
+echo "=================================================="
+docker exec "$CONTAINER" python3 /app/_docky_ingest_folder.py
+
+rm -f /tmp/_docky_ingest_folder.py
 
