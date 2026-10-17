@@ -25,21 +25,21 @@ classifiers = [
 
 dependencies = [
     # LLM & RAG
-    "llama-index>=0.9.0",
+    "llama-index>=0.9.0,<1.0",
     "llama-index-core>=0.1.0",
     "llama-index-llms-ollama>=0.1.0",
     "llama-index-embeddings-huggingface>=0.1.0",
     "llama-index-vector-stores-qdrant>=0.1.0",
     
     # Vector Database
-    "qdrant-client>=2.7.0",
+    "qdrant-client>=1.7.0",
     
     # Embeddings & Re-ranking
-    "sentence-transformers>=2.2.0",
+    "sentence-transformers>=2.2.0,<3.0",
     
     # API Framework
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.20.0",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
     
