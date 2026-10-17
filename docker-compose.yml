@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Qdrant - Vector Database
+  # ============================================================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: docky-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+      - qdrant_snapshots:/qdrant/snapshots
+    environment:
+      - QDRANT_API_KEY=${QDRANT_API_KEY:-}
+    networks:
+      - docky-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # ============================================================================
+  # Ollama - Local LLM Server
+  # ============================================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: docky-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - docky-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # ============================================================================
+  # Docky API - FastAPI Application
+  # ============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docky-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./data/raw:/data/raw
+      - ./data/processed:/data/processed
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DEBUG=true
+      - LOG_LEVEL=INFO
+      - QDRANT_URL=http://qdrant:6333
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - EMBEDDING_DEVICE=cpu
+    networks:
+      - docky-network
+    depends_on:
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  qdrant_storage:
+    driver: local
+  qdrant_snapshots:
+    driver: local
+  ollama_models:
+    driver: local
+
+networks:
+  docky-network:
+    driver: bridge
