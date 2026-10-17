@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     
     # Retrieval/RAG
     RETRIEVAL_TOP_K: int = 5
-    RETRIEVAL_SIMILARITY_THRESHOLD: float = 0.5
+    RETRIEVAL_SIMILARITY_THRESHOLD: float = 0.0  # MiniLM-en com textos PT gera scores baixos; ajuste por domínio
     ENABLE_RERANKING: bool = True
     
     # Cache

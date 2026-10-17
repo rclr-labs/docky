@@ -176,12 +176,13 @@ class SearchService:
         
         # Buscar no Qdrant (top_k documentos candidatos)
         try:
-            search_result = await self.qdrant_client.search(
+            query_response = await self.qdrant_client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_embedding,
+                query=query_embedding,
                 limit=top_k,
                 score_threshold=similarity_threshold,
             )
+            search_result = query_response.points
         except Exception as e:
             logger.error(f"❌ Erro ao buscar no Qdrant: {str(e)}")
             return []

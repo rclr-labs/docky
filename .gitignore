@@ -136,3 +136,10 @@ docky.db-journal
 
 # Docker
 .dockerignore
+
+# Dados de runtime do Docker (volumes de Qdrant e Ollama - não versionar)
+data/qdrant/
+data/ollama/
+data/processed/*
+!data/processed/.gitkeep
+

@@ -29,7 +29,7 @@ class QueryRequest(BaseModel):
     """Request model para query ao chatbot"""
     query: str = Field(..., description="Pergunta do usuário")
     top_k: Optional[int] = Field(default=5, description="Número de documentos a recuperar")
-    threshold: Optional[float] = Field(default=0.5, description="Threshold de similaridade")
+    threshold: Optional[float] = Field(default=settings.RETRIEVAL_SIMILARITY_THRESHOLD, description="Threshold de similaridade")
 
 
 class SearchRequest(BaseModel):
@@ -37,7 +37,7 @@ class SearchRequest(BaseModel):
     query: str = Field(..., description="Texto da busca")
     top_k_initial: Optional[int] = Field(default=15, description="Candidatos iniciais")
     top_k_reranked: Optional[int] = Field(default=5, description="Resultados finais após re-ranking")
-    similarity_threshold: Optional[float] = Field(default=0.5, description="Threshold de similaridade")
+    similarity_threshold: Optional[float] = Field(default=settings.RETRIEVAL_SIMILARITY_THRESHOLD, description="Threshold de similaridade")
 
 
 class SearchResultItem(BaseModel):
@@ -62,7 +62,7 @@ class RAGRequestModel(BaseModel):
     query: str = Field(..., description="Pergunta do usuário")
     top_k_initial: Optional[int] = Field(default=15, description="Candidatos iniciais")
     top_k_reranked: Optional[int] = Field(default=5, description="Resultados finais após re-ranking")
-    similarity_threshold: Optional[float] = Field(default=0.5, description="Threshold de similaridade")
+    similarity_threshold: Optional[float] = Field(default=settings.RETRIEVAL_SIMILARITY_THRESHOLD, description="Threshold de similaridade")
     temperature: Optional[float] = Field(default=None, description="Temperatura do LLM")
 
 
@@ -192,7 +192,7 @@ async def search(request: SearchRequest) -> SearchResponse:
             query=request.query,
             top_k_initial=request.top_k_initial or 15,
             top_k_reranked=request.top_k_reranked or 5,
-            similarity_threshold=request.similarity_threshold or 0.5,
+            similarity_threshold=request.similarity_threshold if request.similarity_threshold is not None else settings.RETRIEVAL_SIMILARITY_THRESHOLD,
         )
         
         if not results:
@@ -255,7 +255,7 @@ async def ask(request: RAGRequestModel) -> QueryResponse:
             query=request.query,
             top_k_initial=request.top_k_initial or 15,
             top_k_reranked=request.top_k_reranked or 5,
-            similarity_threshold=request.similarity_threshold or 0.5,
+            similarity_threshold=request.similarity_threshold if request.similarity_threshold is not None else settings.RETRIEVAL_SIMILARITY_THRESHOLD,
             temperature=request.temperature,
         )
         

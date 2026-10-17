@@ -67,6 +67,9 @@ class DocumentIngestor:
         logger.info(f"Ingestando: {file_path}")
         
         try:
+            # Garantir que a collection existe antes de indexar (resiliente a recriações/limpezas)
+            await self.search_service.ensure_collection()
+            
             # Carregar documento
             doc = await DocumentLoaderFactory.load_document(file_path)
             
