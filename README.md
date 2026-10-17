@@ -1,5 +1,12 @@
 # Docky
 
+![Tests](https://github.com/rafaelnc/docky/actions/workflows/test.yml/badge.svg)
+![Docker](https://github.com/rafaelnc/docky/actions/workflows/docker.yml/badge.svg)
+![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue)
+![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
+![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
+
+
 Chatbot de documentação com RAG otimizado para baixo consumo de tokens, rodando em VPS com modelo LLM local pequeno.
 
 ## Visão geral
@@ -145,6 +152,51 @@ ollama pull mistral  # ou outro modelo
 - 🚧 PDFs
 - 🚧 Imagens/diagramas (via legenda gerada por vision LLM)
 - 🚧 Transcrições (vídeo/áudio)
+
+## CI/CD Pipeline
+
+O projeto possui um pipeline de CI/CD completo com GitHub Actions:
+
+### Workflows
+
+**Tests** (`.github/workflows/test.yml`)
+- Executa em Python 3.10, 3.11, 3.12
+- Ruff linting (code quality)
+- Black formatting check
+- MyPy type checking
+- Pytest com coverage > 80%
+- Upload de coverage para Codecov
+
+**Docker** (`.github/workflows/docker.yml`)
+- Build da imagem Docker
+- Cache automático
+- Testes da imagem
+
+### Rodando Localmente
+
+Antes de fazer push, rode:
+
+```bash
+# Testes com coverage
+pytest --cov
+
+# Linting
+ruff check .
+
+# Formatação
+black .
+
+# Type checking
+mypy ingest api llm
+```
+
+### Badges de Status
+
+- **Tests**: Status dos testes automáticos em múltiplas versões Python
+- **Docker**: Status do build Docker
+- **Code Style**: Conformidade com Black
+- **Ruff**: Análise de qualidade com Ruff
+
 
 ## Primeiros passos com a API
 
