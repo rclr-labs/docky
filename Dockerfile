@@ -9,7 +9,7 @@ COPY llm ./llm
 COPY .env.example .env
 
 # Instalar APENAS o essencial (rápido)
-RUN pip install --no-cache-dir fastapi uvicorn pydantic python-dotenv httpx
+RUN pip install --no-cache-dir fastapi uvicorn pydantic pydantic-settings python-dotenv httpx qdrant-client sentence-transformers
 
 # Expor porta
 EXPOSE 8000
