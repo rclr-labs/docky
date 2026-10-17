@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docky"
-version = "0.1.0"
-description = "Chatbot RAG para documentação usando LlamaIndex"
+version = "0.2.0"
+description = "Chatbot RAG para documentação com busca vetorial e re-ranking"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Docky Team", email = "dev@docky.local"}
 ]
-keywords = ["rag", "chatbot", "llm", "documentation", "llamaindex"]
+keywords = ["rag", "chatbot", "llm", "documentation", "qdrant", "reranker"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
