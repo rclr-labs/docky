@@ -21,9 +21,14 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 40s
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ============================================================================
   # Ollama - Local LLM Server
@@ -35,6 +40,7 @@ services:
       - "11434:11434"
     volumes:
       - ollama_models:/root/.ollama
+      - ./ollama_init.sh:/ollama_init.sh
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
     networks:
@@ -43,9 +49,14 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 5
+      start_period: 60s
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ============================================================================
   # Docky API - FastAPI Application
@@ -61,14 +72,16 @@ services:
       - .:/app
       - ./data/raw:/data/raw
       - ./data/processed:/data/processed
+      - api_cache:/.cache
     environment:
       - API_HOST=0.0.0.0
       - API_PORT=8000
-      - DEBUG=true
+      - DEBUG=false
       - LOG_LEVEL=INFO
       - QDRANT_URL=http://qdrant:6333
       - OLLAMA_BASE_URL=http://ollama:11434
       - EMBEDDING_DEVICE=cpu
+      - PYTHONUNBUFFERED=1
     networks:
       - docky-network
     depends_on:
@@ -80,10 +93,37 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 40s
     restart: unless-stopped
-    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================================
+  # Prometheus - Monitoring (Opcional)
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: docky-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - docky-network
+    restart: unless-stopped
+    profiles: ["monitoring"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   qdrant_storage:
@@ -92,7 +132,14 @@ volumes:
     driver: local
   ollama_models:
     driver: local
+  api_cache:
+    driver: local
+  prometheus_data:
+    driver: local
 
 networks:
   docky-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
