@@ -1,23 +1,24 @@
 """
 Integration tests for DocumentIngestor
-Uses mocks to avoid Qdrant dependencies
+Uses direct mocks without patches
 """
 import pytest
 import tempfile
 import json
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from dataclasses import dataclass
 
 
-# Mock the SearchService to avoid import issues
 @dataclass
 class MockEmbeddingClient:
+    """Mock embedding client"""
     def encode(self, texts):
         return [[0.1] * 384 for _ in texts]
 
 @dataclass 
 class MockQdrantClient:
+    """Mock Qdrant client"""
     async def upsert(self, **kwargs):
         return True
 
@@ -42,10 +43,8 @@ def mock_search_service():
 @pytest.fixture
 def ingestor(mock_search_service):
     """Create DocumentIngestor with mock SearchService"""
-    # Patch the import to avoid qdrant_client dependency
-    with patch('ingest.ingestors.SearchService', return_value=mock_search_service):
-        from ingest.ingestors import DocumentIngestor
-        return DocumentIngestor(mock_search_service)
+    from ingest.ingestors import DocumentIngestor
+    return DocumentIngestor(mock_search_service)
 
 
 class TestDocumentIngestor:
@@ -57,7 +56,7 @@ class TestDocumentIngestor:
         assert ingestor.search_service is mock_search_service
     
     @pytest.mark.asyncio
-    async def test_ingest_text_file(self, ingestor, mock_search_service):
+    async def test_ingest_text_file(self, ingestor):
         """Test ingesting plain text file"""
         with tempfile.NamedTemporaryFile(
             mode='w',
@@ -65,7 +64,7 @@ class TestDocumentIngestor:
             delete=False,
             encoding='utf-8'
         ) as f:
-            f.write("Test content")
+            f.write("Test content for text file")
             f.flush()
             temp_file = f.name
         
@@ -73,7 +72,7 @@ class TestDocumentIngestor:
             result = await ingestor.ingest(temp_file)
             
             assert result.status == "success"
-            assert result.file_type == ".txt"
+            assert result.format == ".txt"
             assert result.chunks_indexed == 3
             assert result.total_size > 0
         finally:
@@ -82,6 +81,9 @@ class TestDocumentIngestor:
     @pytest.mark.asyncio
     async def test_ingest_markdown_file(self, ingestor, mock_search_service):
         """Test ingesting markdown file"""
+        # Mock the index_document to return chunks
+        mock_search_service.index_document = AsyncMock(return_value=2)
+        
         with tempfile.NamedTemporaryFile(
             mode='w',
             suffix='.md',
@@ -95,16 +97,17 @@ class TestDocumentIngestor:
         try:
             result = await ingestor.ingest(temp_file)
             
+            # Should use generic chunking when pydantic_client not available
             assert result.status == "success"
-            assert result.file_type == ".md"
+            assert result.format == ".md"
             assert result.file_name.endswith('.md')
-            # Markdown should have multiple chunks due to structure
+            # Should have chunks from generic chunking
             assert result.chunks_indexed > 0
         finally:
             Path(temp_file).unlink()
     
     @pytest.mark.asyncio
-    async def test_ingest_openapi_file(self, ingestor, mock_search_service):
+    async def test_ingest_openapi_file(self, ingestor):
         """Test ingesting OpenAPI spec"""
         spec = {
             "openapi": "3.0.0",
@@ -138,7 +141,7 @@ class TestDocumentIngestor:
             result = await ingestor.ingest(temp_file)
             
             assert result.status == "success"
-            assert result.file_type == ".json"
+            assert result.format == ".json"
         finally:
             Path(temp_file).unlink()
     
@@ -180,12 +183,12 @@ class TestDocumentIngestor:
             delete=False,
             encoding='utf-8'
         ) as f:
-            f.write("Test content for doc")
+            f.write("Test content for custom id")
             f.flush()
             temp_file = f.name
         
         try:
-            custom_id = "my-custom-doc-id"
+            custom_id = "my-custom-doc-id-12345"
             result = await ingestor.ingest(temp_file, doc_id=custom_id)
             
             assert result.doc_id == custom_id
@@ -199,7 +202,6 @@ class TestDocumentIngestor:
         temp_files = []
         
         try:
-            # Create test files
             for i in range(3):
                 with tempfile.NamedTemporaryFile(
                     mode='w',
@@ -226,7 +228,6 @@ class TestDocumentIngestor:
         ready = await ingestor.ensure_ready()
         
         assert ready is True
-        await mock_search_service.ensure_collection()
     
     def test_get_supported_formats(self, ingestor):
         """Test getting supported formats"""
@@ -237,7 +238,7 @@ class TestDocumentIngestor:
         assert ".json" in formats
 
 
-class TestIngestResultDataclass:
+class TestIngestResult:
     """Tests for IngestResult dataclass"""
     
     def test_ingest_result_creation(self):
@@ -272,9 +273,9 @@ class TestIngestResultDataclass:
             chunks_indexed=0,
             total_size=0,
             status="error",
-            error_message="Test error",
+            error_message="Test error message",
         )
         
         assert result.status == "error"
-        assert result.error_message == "Test error"
+        assert result.error_message == "Test error message"
         assert result.chunks_indexed == 0
