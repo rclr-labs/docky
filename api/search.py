@@ -212,7 +212,7 @@ class SearchService:
     async def search_with_reranking(
         self,
         query: str,
-        top_k_initial: int = 15,
+        top_k_initial: int = settings.RETRIEVAL_TOP_K_INITIAL,
         top_k_reranked: int = 5,
         similarity_threshold: float = 0.5,
     ) -> list[SearchResult]:

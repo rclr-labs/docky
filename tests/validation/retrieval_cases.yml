@@ -1,0 +1,60 @@
+# Casos de validacao da recuperacao do Docky.
+#
+# Cada caso: uma pergunta cuja resposta SABEMOS estar nos dados ingeridos,
+# o(s) arquivo(s) onde ela deve ser encontrada e palavras-chave que devem
+# aparecer nos trechos recuperados.
+#
+# Regras:
+#   expect_any_files: basta UM destes arquivos aparecer no top-k
+#   expect_keywords:  basta UMA destas palavras aparecer nos chunks recuperados
+#                     (comparacao case-insensitive)
+#
+# Adicione um caso sempre que ingerir um lote novo de documentos.
+# Rode com:  ./scripts/validate.sh
+
+cases:
+  # ---------- acervo PITQA (fixtures de demonstracao) ----------
+  - id: basis-definicao
+    query: "O que é o módulo BASIS do PITQA?"
+    expect_any_files: ["sample_deck.pptx", "sample_meeting.vtt"]
+    expect_keywords: ["baseline", "basis", "infraestrutura"]
+
+  # ---------- markdowns do programa ----------
+  - id: incidente-primeira-resposta
+    query: "Quais são os primeiros passos na resposta a um incidente de segurança?"
+    expect_any_files: ["P13.01.md"]
+    expect_keywords: ["incidente"]
+
+  - id: vazamento-planilha-oculta
+    query: "O que aconteceu no caso do vazamento em planilha oculta?"
+    expect_any_files: ["P13.01.md"]
+    expect_keywords: ["planilha"]
+
+  # ---------- mentoria de raciocinio aplicado (transcricoes reais) ----------
+  - id: mentoria-ambiguidades-demanda
+    query: "Como identificar ambiguidades e premissas em uma demanda real?"
+    expect_any_files: ["Learn · RL01.vtt"]
+    expect_keywords: ["ambiguidade", "premissa", "ambiguidades"]
+
+  - id: mentoria-valores-extremos
+    query: "Quais tipos de teste envolvem valores extremos e concorrência?"
+    expect_any_files: ["Learn · RL01.vtt"]
+    expect_keywords: ["extremos", "concorrência", "concorrencia"]
+
+  - id: kickoff-entregaveis
+    query: "Quais são os entregáveis da mentoria de raciocínio aplicado?"
+    expect_any_files: ["Kickoff - Mentoria de Raciocínio Aplicado"]
+    expect_keywords: ["entregáveis", "entregaveis"]
+
+  - id: rl02-grupos-desabilitados
+    query: "Como deve se comportar a interface quando um grupo de chamados está desabilitado?"
+    expect_any_files: ["Explore · RL02.vtt"]
+    expect_keywords: ["grupo"]
+
+  # ---------- ausencia de conteudo (nao deve achar nada relevante) ----------
+  # Nao falha o caso: apenas reporta o top_score para voce ver se o sistema
+  # esta devolvendo coisa irrelevante com score alto (isso sim seria problema).
+  - id: topico-ausente
+    query: "Qual é a capital da França e qual a população de Tóquio?"
+    expect_any_files: []
+    expect_keywords: []

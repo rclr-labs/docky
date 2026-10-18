@@ -4,6 +4,7 @@ Serviço RAG completo: busca → re-rank → compress → prompt → LLM
 import logging
 from typing import Optional
 
+from api.config import settings
 from api.search import SearchService, SearchResult
 from llm.client import OllamaClient
 
@@ -60,7 +61,7 @@ class RAGService:
     async def ask(
         self,
         query: str,
-        top_k_initial: int = 15,
+        top_k_initial: int = settings.RETRIEVAL_TOP_K_INITIAL,
         top_k_reranked: int = 5,
         similarity_threshold: float = 0.5,
         temperature: Optional[float] = None,

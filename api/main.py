@@ -35,7 +35,7 @@ class QueryRequest(BaseModel):
 class SearchRequest(BaseModel):
     """Request model para busca vetorial"""
     query: str = Field(..., description="Texto da busca")
-    top_k_initial: Optional[int] = Field(default=15, description="Candidatos iniciais")
+    top_k_initial: Optional[int] = Field(default=settings.RETRIEVAL_TOP_K_INITIAL, description="Candidatos iniciais")
     top_k_reranked: Optional[int] = Field(default=5, description="Resultados finais após re-ranking")
     similarity_threshold: Optional[float] = Field(default=settings.RETRIEVAL_SIMILARITY_THRESHOLD, description="Threshold de similaridade")
 
@@ -60,7 +60,7 @@ class SearchResponse(BaseModel):
 class RAGRequestModel(BaseModel):
     """Request model para RAG"""
     query: str = Field(..., description="Pergunta do usuário")
-    top_k_initial: Optional[int] = Field(default=15, description="Candidatos iniciais")
+    top_k_initial: Optional[int] = Field(default=settings.RETRIEVAL_TOP_K_INITIAL, description="Candidatos iniciais")
     top_k_reranked: Optional[int] = Field(default=5, description="Resultados finais após re-ranking")
     similarity_threshold: Optional[float] = Field(default=settings.RETRIEVAL_SIMILARITY_THRESHOLD, description="Threshold de similaridade")
     temperature: Optional[float] = Field(default=None, description="Temperatura do LLM")
@@ -190,7 +190,7 @@ async def search(request: SearchRequest) -> SearchResponse:
     try:
         results = await search_service.search_with_reranking(
             query=request.query,
-            top_k_initial=request.top_k_initial or 15,
+            top_k_initial=request.top_k_initial or settings.RETRIEVAL_TOP_K_INITIAL,
             top_k_reranked=request.top_k_reranked or 5,
             similarity_threshold=request.similarity_threshold if request.similarity_threshold is not None else settings.RETRIEVAL_SIMILARITY_THRESHOLD,
         )
@@ -253,7 +253,7 @@ async def ask(request: RAGRequestModel) -> QueryResponse:
     try:
         rag_response = await rag_service.ask(
             query=request.query,
-            top_k_initial=request.top_k_initial or 15,
+            top_k_initial=request.top_k_initial or settings.RETRIEVAL_TOP_K_INITIAL,
             top_k_reranked=request.top_k_reranked or 5,
             similarity_threshold=request.similarity_threshold if request.similarity_threshold is not None else settings.RETRIEVAL_SIMILARITY_THRESHOLD,
             temperature=request.temperature,

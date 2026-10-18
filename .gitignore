@@ -147,3 +147,12 @@ data/processed/*
 _docky_*.py
 _test_*.py
 
+# Midia pesada do acervo (videos/audios NUNCA entram no git - so as transcricoes)
+data/raw/**/*.mp4
+data/raw/**/*.mov
+data/raw/**/*.mkv
+data/raw/**/*.webm
+data/raw/**/*.m4a
+data/raw/**/*.mp3
+data/raw/**/*.wav
+

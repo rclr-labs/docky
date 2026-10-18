@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     
     # Retrieval/RAG
     RETRIEVAL_TOP_K: int = 5
+    # Candidatos iniciais da busca vetorial antes do re-ranker. 50 (e nao 15)
+    # porque corpus com transcricoes coloquiais desloca chunks relevantes para
+    # a posicao ~20-25; o re-ranker resgata bem quando recebe candidatos.
+    RETRIEVAL_TOP_K_INITIAL: int = 50
     RETRIEVAL_SIMILARITY_THRESHOLD: float = 0.0  # MiniLM-en com textos PT gera scores baixos; ajuste por domínio
     ENABLE_RERANKING: bool = True
     
