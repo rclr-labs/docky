@@ -122,6 +122,23 @@ class DocumentLoaderFactory:
         except ImportError as e:
             logger.debug(f"OpenAPILoader not available: {e}")
         
+        # Try to import and register PPTX loader (requer python-pptx)
+        try:
+            from ingest.loaders.pptx_loader import PPTXLoader
+            cls._loaders[".pptx"] = PPTXLoader()
+            logger.info("Registered PPTXLoader")
+        except ImportError as e:
+            logger.debug(f"PPTXLoader not available: {e}")
+        
+        # Try to import and register transcript loader (VTT/SRT de Zoom/Meet/Whisper)
+        try:
+            from ingest.loaders.transcript_loader import TranscriptLoader
+            cls._loaders[".vtt"] = TranscriptLoader()
+            cls._loaders[".srt"] = TranscriptLoader()
+            logger.info("Registered TranscriptLoader")
+        except ImportError as e:
+            logger.debug(f"TranscriptLoader not available: {e}")
+        
         cls._initialized = True
     
     @classmethod

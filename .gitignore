@@ -143,3 +143,7 @@ data/ollama/
 data/processed/*
 !data/processed/.gitkeep
 
+# Scripts temporarios copiados para dentro do container (bind mount .:/app)
+_docky_*.py
+_test_*.py
+

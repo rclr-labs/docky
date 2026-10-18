@@ -3,7 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Instalar TODAS as dependências
-RUN pip install --no-cache-dir fastapi uvicorn pydantic pydantic-settings python-dotenv httpx qdrant-client sentence-transformers markdown python-docx PyPDF2 llama-index aiofiles
+RUN pip install --no-cache-dir fastapi uvicorn pydantic pydantic-settings python-dotenv httpx qdrant-client sentence-transformers markdown python-docx python-pptx PyPDF2 llama-index aiofiles
 
 # Copiar código
 COPY api ./api

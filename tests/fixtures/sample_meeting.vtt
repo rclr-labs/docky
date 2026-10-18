@@ -1,0 +1,21 @@
+WEBVTT
+
+1
+00:00:03.000 --> 00:00:09.500
+Rafael Costa: Bom dia pessoal, bem-vindos a mais uma aula do modulo BASIS do PITQA.
+
+2
+00:00:09.800 --> 00:00:18.200
+Rafael Costa: Hoje vamos falar sobre resposta a incidentes, que e um dos temas mais importantes da formacao.
+
+3
+00:00:19.000 --> 00:00:27.400
+Rafael Costa: O BASIS, para quem ainda nao sabe, e o modulo que cobre toda a base de infraestrutura que um QA precisa.
+
+4
+00:00:40.000 --> 00:00:48.900
+Maria Silva: Professor, uma duvida: o teste pratico vai cobrar os comandos de preservacao de evidencias?
+
+5
+00:00:49.200 --> 00:00:58.000
+Rafael Costa: Otima pergunta Maria. Sim, o TPO vai exigir que voces suspendam o processo malicioso e gerem o hash das evidencias.

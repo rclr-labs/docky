@@ -29,7 +29,7 @@ from ingest.ingestors import DocumentIngestor
 from api.search import SearchService
 
 FOLDER = "$FOLDER"
-EXTENSIONS = [".md", ".txt", ".json", ".yaml", ".yml"]
+EXTENSIONS = [".md", ".txt", ".json", ".yaml", ".yml", ".pptx", ".vtt", ".srt"]
 
 async def main():
     folder = Path(FOLDER)
