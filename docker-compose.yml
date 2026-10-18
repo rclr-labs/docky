@@ -24,4 +24,7 @@ services:
       - "11434:11434"
     volumes:
       - ./data/ollama:/root/.ollama
+    environment:
+      # Nunca descarrega o modelo da memoria: evita cold start de ~160s na 1a pergunta
+      - OLLAMA_KEEP_ALIVE=-1
 

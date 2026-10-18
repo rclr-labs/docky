@@ -139,6 +139,14 @@ class DocumentLoaderFactory:
         except ImportError as e:
             logger.debug(f"TranscriptLoader not available: {e}")
         
+        # Try to import and register DOCX loader (notas/atas do Gemini, Word)
+        try:
+            from ingest.loaders.docx_loader import DOCXLoader
+            cls._loaders[".docx"] = DOCXLoader()
+            logger.info("Registered DOCXLoader")
+        except ImportError as e:
+            logger.debug(f"DOCXLoader not available: {e}")
+        
         cls._initialized = True
     
     @classmethod

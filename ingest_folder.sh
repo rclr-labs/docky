@@ -21,15 +21,14 @@ CONTAINER="docky-api-1"
 
 cat > /tmp/_docky_ingest_folder.py << PYEOF
 import asyncio
+import hashlib
 import sys
-import uuid
 from pathlib import Path
 
 from ingest.ingestors import DocumentIngestor
-from api.search import SearchService
 
 FOLDER = "$FOLDER"
-EXTENSIONS = [".md", ".txt", ".json", ".yaml", ".yml", ".pptx", ".vtt", ".srt"]
+EXTENSIONS = [".md", ".txt", ".json", ".yaml", ".yml", ".pptx", ".docx", ".vtt", ".srt"]
 
 async def main():
     folder = Path(FOLDER)
@@ -44,11 +43,29 @@ async def main():
 
     print(f"Encontrados: {len(files)} arquivo(s)\n")
 
-    ingestor = DocumentIngestor(SearchService())
-    ok, fail = 0, 0
+    from qdrant_client.models import FieldCondition, Filter, MatchValue
+    from api.search import SearchService
+
+    search = SearchService()
+    ingestor = DocumentIngestor(search)
+
+    ok, fail, replaced = 0, 0, 0
 
     for f in files:
-        doc_id = str(uuid.uuid4())  # doc_id UNICO por arquivo - nunca reusar entre arquivos
+        # IDEMPOTENCIA: remove os chunks antigos deste arquivo antes de re-ingerir.
+        # Sem isto, rodar a ingestao duas vezes acumula duplicatas no Qdrant.
+        try:
+            await search.qdrant_client.delete(
+                collection_name=search.collection_name,
+                points_selector=Filter(must=[FieldCondition(
+                    key="file_name", match=MatchValue(value=f.name))]),
+            )
+            replaced += 1
+        except Exception:
+            pass
+
+        # doc_id estavel por caminho: re-ingestao do mesmo arquivo reusa o mesmo id
+        doc_id = hashlib.sha1(str(f.resolve()).encode()).hexdigest()[:16]
         print(f"Ingerindo: {f}...", end=" ", flush=True)
         try:
             result = await ingestor.ingest(str(f), doc_id=doc_id)
@@ -75,4 +92,3 @@ echo "=================================================="
 docker exec "$CONTAINER" python3 /app/_docky_ingest_folder.py
 
 rm -f /tmp/_docky_ingest_folder.py
-

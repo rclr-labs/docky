@@ -51,6 +51,17 @@ cases:
     expect_any_files: ["Explore · RL02.vtt"]
     expect_keywords: ["grupo"]
 
+  # ---------- notas do Gemini (.docx) ----------
+  - id: docx-riscos-caminho-feliz
+    query: "Quais são os riscos de focar apenas no caminho feliz nos testes?"
+    expect_any_files: ["Learn · RL01.04"]
+    expect_keywords: ["caminho feliz"]
+
+  - id: docx-fluxos-alternativos-vs-borda
+    query: "Qual a diferença entre fluxos alternativos e casos de borda?"
+    expect_any_files: ["Learn · RL01.04"]
+    expect_keywords: ["fluxos alternativos", "borda"]
+
   # ---------- ausencia de conteudo (nao deve achar nada relevante) ----------
   # Nao falha o caso: apenas reporta o top_score para voce ver se o sistema
   # esta devolvendo coisa irrelevante com score alto (isso sim seria problema).
