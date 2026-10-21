@@ -84,7 +84,7 @@
     },
     {
       "id": "bandit",
-      "run": "python3.11 -m venv .venv-sec && . .venv-sec/bin/activate && python -m pip install --upgrade pip bandit && bandit -r ingest api lib -ll -ii",
+      "run": "python3.11 -m venv .venv-sec && . .venv-sec/bin/activate && python -m pip install --upgrade pip bandit && bandit -r ingest api lib || true && bandit -r ingest api lib -ll -ii",
       "paths": [
         "ingest/**",
         "api/**",
