@@ -1,7 +1,7 @@
 {
   "nome": "docky",
   "versao": 1,
-  "protegidos": ["ci/**", "pyproject.toml", "pytest.ini"],
+  "protegidos": ["ci/**", "pyproject.toml", "pytest.ini", ".ruff.toml", ".coveragerc"],
   "jobs": [
     {
       "id": "test-py310",
@@ -69,8 +69,8 @@
       "sandbox": { "rede": "liberada" }
     },
     {
-      "id": "security",
-      "run": "python3.11 -m pip install --upgrade pip bandit safety && bandit -r ingest api llm -f json -o bandit-report.json && safety check --json --continue-on-error",
+      "id": "bandit",
+      "run": "python3.11 -m pip install --upgrade pip bandit && bandit -r ingest api llm -f json -o bandit-report.json",
       "paths": [
         "ingest/**",
         "api/**",
@@ -81,6 +81,17 @@
       "timeout_seg": 600,
       "continue_on_error": true,
       "outputs": ["bandit-report.json"],
+      "sandbox": { "rede": "liberada" }
+    },
+    {
+      "id": "safety",
+      "run": "python3.11 -m pip install --upgrade pip safety && safety check --json --continue-on-error",
+      "paths": [
+        "pyproject.toml"
+      ],
+      "classe": "pre-merge",
+      "timeout_seg": 600,
+      "continue_on_error": true,
       "sandbox": { "rede": "liberada" }
     }
   ]
