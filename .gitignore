@@ -137,22 +137,24 @@ docky.db-journal
 # Docker
 .dockerignore
 
-# Dados de runtime do Docker (volumes de Qdrant e Ollama - não versionar)
-data/qdrant/
-data/ollama/
-data/processed/*
+# data/ NAO entra no git -- nada dele.
+#
+# Antes a regra era por tipo: volumes de Qdrant/Ollama fora, midia pesada fora
+# por extensao, transcricoes dentro. Lista por extensao deixa passar o que
+# ninguem previu (um .zip ou .pdf de 2 GB nao casava com nenhuma linha), e
+# `data/` ja soma 11 GB nesta maquina. A regra agora e o contrario: tudo fora,
+# e o que precisar entrar tem de ser dito explicitamente.
+#
+# Os .gitkeep sao a excecao, e nao por capricho: sem eles um clone novo nao tem
+# os diretorios que o codigo de ingestao espera encontrar para escrever.
+data/**
+!data/raw/
+!data/raw/.gitkeep
+!data/processed/
 !data/processed/.gitkeep
 
 # Scripts temporarios copiados para dentro do container (bind mount .:/app)
 _docky_*.py
 _test_*.py
 
-# Midia pesada do acervo (videos/audios NUNCA entram no git - so as transcricoes)
-data/raw/**/*.mp4
-data/raw/**/*.mov
-data/raw/**/*.mkv
-data/raw/**/*.webm
-data/raw/**/*.m4a
-data/raw/**/*.mp3
-data/raw/**/*.wav
 
