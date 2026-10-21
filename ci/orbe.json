@@ -1,0 +1,87 @@
+{
+  "nome": "docky",
+  "versao": 1,
+  "protegidos": ["ci/**", "pyproject.toml", "pytest.ini"],
+  "jobs": [
+    {
+      "id": "test-py310",
+      "run": "python3.10 -m pip install --upgrade pip && python3.10 -m pip install -e \".[dev]\" && python3.10 -m pytest --cov=ingest --cov=api --cov=llm --cov-report=xml --cov-report=term-missing",
+      "paths": [
+        "ingest/**",
+        "api/**",
+        "llm/**",
+        "tests/**",
+        "pyproject.toml",
+        "pytest.ini",
+        ".coveragerc"
+      ],
+      "classe": "pre-merge",
+      "timeout_seg": 1200,
+      "sandbox": { "rede": "liberada" }
+    },
+    {
+      "id": "test-py311",
+      "run": "python3.11 -m pip install --upgrade pip && python3.11 -m pip install -e \".[dev]\" && python3.11 -m pytest --cov=ingest --cov=api --cov=llm --cov-report=xml --cov-report=term-missing",
+      "paths": [
+        "ingest/**",
+        "api/**",
+        "llm/**",
+        "tests/**",
+        "pyproject.toml",
+        "pytest.ini",
+        ".coveragerc"
+      ],
+      "classe": "pre-merge",
+      "timeout_seg": 1200,
+      "sandbox": { "rede": "liberada" }
+    },
+    {
+      "id": "test-py312",
+      "run": "python3.12 -m pip install --upgrade pip && python3.12 -m pip install -e \".[dev]\" && python3.12 -m pytest --cov=ingest --cov=api --cov=llm --cov-report=xml --cov-report=term-missing",
+      "paths": [
+        "ingest/**",
+        "api/**",
+        "llm/**",
+        "tests/**",
+        "pyproject.toml",
+        "pytest.ini",
+        ".coveragerc"
+      ],
+      "classe": "pre-merge",
+      "timeout_seg": 1200,
+      "sandbox": { "rede": "liberada" }
+    },
+    {
+      "id": "lint",
+      "run": "python3.11 -m pip install --upgrade pip && python3.11 -m pip install ruff black isort mypy && ruff check . && black --check . && isort --check-only . && mypy ingest api llm --strict",
+      "paths": [
+        "ingest/**",
+        "api/**",
+        "llm/**",
+        "tests/**",
+        "scripts/**",
+        "examples/**",
+        "pyproject.toml",
+        ".ruff.toml"
+      ],
+      "classe": "pre-merge",
+      "timeout_seg": 600,
+      "sandbox": { "rede": "liberada" }
+    },
+    {
+      "id": "security",
+      "run": "python3.11 -m pip install --upgrade pip bandit safety && bandit -r ingest api llm -f json -o bandit-report.json && safety check --json --continue-on-error",
+      "paths": [
+        "ingest/**",
+        "api/**",
+        "llm/**",
+        "pyproject.toml"
+      ],
+      "classe": "pre-merge",
+      "timeout_seg": 600,
+      "continue_on_error": true,
+      "outputs": ["bandit-report.json"],
+      "sandbox": { "rede": "liberada" }
+    }
+  ]
+}
