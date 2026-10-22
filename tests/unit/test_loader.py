@@ -5,10 +5,15 @@ import pytest
 from pathlib import Path
 from ingest.loader import (
     TextLoader,
-    MarkdownLoader,
     DocumentLoaderFactory,
     DocumentMetadata,
 )
+
+# MarkdownLoader mudou de módulo na refatoração que integrou os loaders ao
+# DocumentLoaderFactory. O factory já importa daqui; este teste não acompanhou,
+# e o ImportError abortava a COLETA do pytest — nenhum teste do repositório
+# rodava, não só os deste arquivo.
+from ingest.loaders.markdown_loader import MarkdownLoader
 
 
 @pytest.fixture
