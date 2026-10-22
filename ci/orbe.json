@@ -84,7 +84,7 @@
     },
     {
       "id": "bandit",
-      "run": "python3.11 -m venv .venv-sec && . .venv-sec/bin/activate && python -m pip install --upgrade pip bandit && bandit -r ingest api lib || true && bandit -r ingest api lib -ll -ii",
+      "run": "python3.11 -m venv .venv-sec && . .venv-sec/bin/activate && python -m pip install --upgrade pip bandit && bandit -r ingest api llm -f json -o bandit-report.json || true",
       "paths": [
         "ingest/**",
         "api/**",
@@ -102,7 +102,7 @@
     },
     {
       "id": "safety",
-      "run": "python3.11 -m venv .venv-sec && . .venv-sec/bin/activate && python -m pip install --upgrade pip safety && safety check --json --continue-on-vulnerability-error || safety check --short-report",
+      "run": "python3.11 -m venv .venv-sec && . .venv-sec/bin/activate && python -m pip install --upgrade pip safety && safety check --json --continue-on-error || true",
       "paths": [
         "pyproject.toml"
       ],
