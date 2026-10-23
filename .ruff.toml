@@ -1,7 +1,20 @@
+# `line-length` e `target-version` são opções de TOPO, não de `[lint]`.
+#
+# Com `line-length` dentro de `[lint]`, o ruff recusava o arquivo inteiro
+# (`unknown field`) e saía 2 — ou seja: o lint deste repositório nunca rodou,
+# parecendo configurado. O job `lint` no Orbe falhava antes de olhar uma linha
+# de código.
+line-length = 100
+# Estava só no `[tool.ruff]` do pyproject.toml, que este arquivo sombreia por
+# completo. Trazido para cá para a intenção não se perder junto com o bloco
+# morto.
+target-version = "py310"
+
 [lint]
 select = ["E", "F", "W", "I", "N", "UP", "ANN", "C4", "BLE", "B", "A", "COM"]
-ignore = ["E501", "ANN101", "ANN102"]
-line-length = 100
+# `ANN101` e `ANN102` saíram do ruff: ele avisa que "ignorar não tem efeito".
+# Mantê-los era uma lista que mentia sobre o que estava sendo silenciado.
+ignore = ["E501"]
 
 [format]
 quote-style = "double"
